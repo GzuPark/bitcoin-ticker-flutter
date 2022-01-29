@@ -38,18 +38,24 @@ final String coinApiUrl = dotenv.env['BASE_URL'].toString();
 final String apiKey = dotenv.env['API_KEY'].toString();
 
 class CoinData {
-  Future getCoinData(String currency) async {
-    String url = '$coinApiUrl/BTC/$currency?apikey=$apiKey';
-    http.Response response = await http.get(Uri.parse(url));
+  Future<Map<String, String>> getCoinData(String currency) async {
+    Map<String, String> cryptoPrices = {};
 
-    if (response.statusCode == 200) {
-      String data = response.body;
-      var decodedData = jsonDecode(data);
-      var price = decodedData['rate'];
-      return price;
-    } else {
-      print(response.statusCode);
-      throw 'Problem with the get request';
+    for (String crypto in cryptoList) {
+      String url = '$coinApiUrl/$crypto/$currency?apikey=$apiKey';
+      http.Response response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        String data = response.body;
+        var decodedData = jsonDecode(data);
+        double price = decodedData['rate'];
+        cryptoPrices[crypto] = price.toStringAsFixed(1);
+      } else {
+        print(response.statusCode);
+        throw 'Problem with the get request';
+      }
     }
+
+    return cryptoPrices;
   }
 }
