@@ -7,6 +7,15 @@
 
 The objective of this tutorial is to learn about using Cupertino and Material Widgets in parallel and providing a different user interface depending on the platform.
 
+## Prerequisite
+- Use environment file to store API key due to keep private :)
+- Install the [flutter_dotenv](https://pub.dev/packages/flutter_dotenv) package
+- Create `.env` file and add to assets in the `pubspec.yaml` file
+
+    ```sh
+    BASE_URL= # Base URL from the coinapi 
+    API_KEY=  # Use yours
+    ```
 
 ## What you will create
 

@@ -10,6 +10,9 @@ class PriceScreen extends StatefulWidget {
 }
 
 class _PriceScreenState extends State<PriceScreen> {
+  CoinData coin = CoinData();
+  String? btc = '?';
+
   String selectedCurrency = 'USD';
 
   DropdownButton<String> androidDropdownButton() {
@@ -48,9 +51,24 @@ class _PriceScreenState extends State<PriceScreen> {
     return CupertinoPicker(
       backgroundColor: Colors.lightBlue,
       itemExtent: 32.0,
-      onSelectedItemChanged: (selectedIndex) {},
+      onSelectedItemChanged: (selectedIndex) async {
+        var coinData = await coin.getData();
+        updateUI(coinData);
+      },
       children: pickItems,
     );
+  }
+
+  void updateUI(dynamic coinData) {
+    setState(() {
+      if (coinData == null) {
+        btc = '?';
+        return;
+      }
+
+      double _value = coinData['rate'];
+      btc = _value.toStringAsFixed(1);
+    });
   }
 
   @override
@@ -74,7 +92,7 @@ class _PriceScreenState extends State<PriceScreen> {
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
                 child: Text(
-                  '1 BTC = ? USD',
+                  '1 BTC = $btc USD',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 20.0,
