@@ -3,6 +3,7 @@ import 'dart:io' show Platform;
 import 'package:bitcoin_ticker/coin_data.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 
 class PriceScreen extends StatefulWidget {
   @override
@@ -10,10 +11,8 @@ class PriceScreen extends StatefulWidget {
 }
 
 class _PriceScreenState extends State<PriceScreen> {
-  CoinData coin = CoinData();
-  String? btc = '?';
-
   String selectedCurrency = 'USD';
+  String bitcoinPrice = '?';
 
   DropdownButton<String> androidDropdownButton() {
     List<DropdownMenuItem<String>> dropdownItems = [];
@@ -31,7 +30,10 @@ class _PriceScreenState extends State<PriceScreen> {
       value: selectedCurrency,
       items: dropdownItems,
       onChanged: (value) {
-        setState(() => selectedCurrency = value!);
+        setState(() {
+          selectedCurrency = value!;
+          getData();
+        });
       },
     );
   }
@@ -51,24 +53,29 @@ class _PriceScreenState extends State<PriceScreen> {
     return CupertinoPicker(
       backgroundColor: Colors.lightBlue,
       itemExtent: 32.0,
-      onSelectedItemChanged: (selectedIndex) async {
-        var coinData = await coin.getData();
-        updateUI(coinData);
+      onSelectedItemChanged: (selectedIndex) {
+        selectedCurrency = currenciesList[selectedIndex];
+        getData();
       },
       children: pickItems,
     );
   }
 
-  void updateUI(dynamic coinData) {
-    setState(() {
-      if (coinData == null) {
-        btc = '?';
-        return;
-      }
+  void getData() async {
+    try {
+      double data = await CoinData().getCoinData(selectedCurrency);
+      setState(() {
+        bitcoinPrice = data.toStringAsFixed(1);
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
 
-      double _value = coinData['rate'];
-      btc = _value.toStringAsFixed(1);
-    });
+  @override
+  void initState() {
+    super.initState();
+    getData();
   }
 
   @override
@@ -92,7 +99,7 @@ class _PriceScreenState extends State<PriceScreen> {
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
                 child: Text(
-                  '1 BTC = $btc USD',
+                  '1 BTC = $bitcoinPrice $selectedCurrency',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 20.0,
